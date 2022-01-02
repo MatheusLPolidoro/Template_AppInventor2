@@ -17,30 +17,30 @@ def selectArq(ext, caminho=''):
     return filedialog.askopenfilename(filetypes=[('APP inventor', ext)], initialfile= caminho)
 
 
-def arquivoExiste(caminho: str, nome: str, extensao: str, /) -> bool:
+def arquivoExiste(caminho: str, nome: str, extensao: str, zipFile, /) -> bool:
     """
     -> Valida se um arquivo existe.
     :param nome: (obrigatorio) Nome completo do aquivo.
     :return: Verdadeiro ou falso para a existencia do arquivo.
     """
-    try:
-        a = open(caminho + '\\' + nome + '.' + extensao, 'rt')
-        a.close()
-    except FileNotFoundError:
-        return False
-    else:
-        return True
+    with ZipFile(zipFile, mode='a') as myzip:
+        try:
+            myzip.open(caminho + '/' + nome + '.' + extensao, 'r')
+        except:
+            return False
+        else:
+            return True
 
 
-def criarArquivo(caminho: str, nome: str, extencao: str, orig: str, zipFile: str, /) -> bool:
+def criarArquivo(caminho: str, nome: str, extensao: str, orig: str, zipFile: str, /) -> bool:
     """
     -> Cria um arquivo.
     :param nome: (obrigatorio) Nome completo do arquivo.
     :return: Não retorna valores.
     """
     try:
-        src = caminho + '/' + orig + '.' + extencao
-        dest = caminho + '/' + nome + '.' + extencao
+        src = caminho + '/' + orig + '.' + extensao
+        dest = caminho + '/' + nome + '.' + extensao
 
         with ZipFile(zipFile, mode='r') as myzip:
             with myzip.open(src, 'r') as myfile:
@@ -52,7 +52,7 @@ def criarArquivo(caminho: str, nome: str, extencao: str, orig: str, zipFile: str
     except:
         print('Houve um ERRO na criação do arquivo!')
     else:
-        print(f'Arquivo {nome + "." + extencao} criado com sucessso!')
+        print(f'Arquivo {nome + "." + extensao} criado com sucessso!')
 
 
 def copyArq(escolha, zipFile):
@@ -76,13 +76,12 @@ def copyArq(escolha, zipFile):
             for a in arqs:
                 orig = a.split('/')[-1].split('.')[0]
                 extencao = a.split('.')[1]
-                print(caminho, orig, extencao)
-                if not arquivoExiste(caminho, nome, extencao):
+                if not arquivoExiste(caminho, nome, extencao, zipFile):
                     criarArquivo(caminho, nome, extencao, orig, zipFile)
                 else:
                     print(f'Arquivo {nome + "." + extencao} não foi criado, pois já existe!')
-        aiaFile = zipFile.replace('.zip', '.aia')
-        os.rename(zipFile, aiaFile)
+    aiaFile = zipFile.replace('.zip', '.aia')
+    os.rename(zipFile, aiaFile)
 
 
 def listaArq(escolha, zipFile):
@@ -122,6 +121,8 @@ def createPage():
                 listaArq(escolha, zipFile)
         except:
             print('Cancelado...')
+            dirFile = selectArq('.zip')
+            zipFile = dirFile.replace('.zip', '.aia')
     else:
         print('Sem nomes de páginas...')
 
