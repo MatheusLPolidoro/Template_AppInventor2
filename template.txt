@@ -1,0 +1,6 @@
+cadastro
+login
+home
+perfil
+config
+
